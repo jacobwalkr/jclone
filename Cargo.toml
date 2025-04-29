@@ -1,0 +1,8 @@
+[package]
+name = "jclone"
+description = "A command line tool for cloning and organising git repositories"
+version = "0.1.0"
+edition = "2024"
+license = "BSD-3-Clause-No-Military-License"
+
+[dependencies]
