@@ -9,15 +9,16 @@ What can I say? I like to keep my repos organised.
 
 # Usage
 
-Use `jclone` in place of `git clone`:
+Clones the given repository into `~/src/<path/to/repo>`. For example:
 
 ```
-$ jclone --depth=1 git@github.com:rust-lang/rustlings.git ~/src/rust-lang/rustlings
+$ jclone git@github.com:rust-lang/rustlings.git
 ```
 
 Gives you:
 
 ```
-Cloning into 'rustlings'...
+Cloning repository to "/home/jacob/src/github.com/rust-lang/rustlings"...
+🎉 Done!
 
 ```
