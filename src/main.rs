@@ -1,19 +1,19 @@
-use std::{env, fs};
 use std::io::{self, Write};
 use std::path::PathBuf;
 use std::process::Command;
+use std::{env, fs};
 
 fn main() {
     let arg_repo = env::args().nth(1).expect("expecting argument: repository");
 
-    let (host_part, path_part) = parse_repo_string(&arg_repo).expect("couldn't parse repository");
+    let repository = parse_repo_string(&arg_repo).expect("couldn't parse repository");
 
     let home_dir = env::var("HOME").expect("$HOME isn't set");
 
     let mut target_dir = PathBuf::from(home_dir);
     target_dir.push("src");
-    target_dir.push(host_part);
-    target_dir.push(path_part);
+    target_dir.push(repository.host);
+    target_dir.push(repository.path);
 
     fs::create_dir_all(&target_dir).expect("error creating clone directory");
 
@@ -39,10 +39,15 @@ fn main() {
     }
 }
 
-fn parse_repo_string(repo_str: &str) -> Result<(&str, &str), &str> {
+struct Repository {
+    host: String,
+    path: String,
+}
+
+fn parse_repo_string(repo_str: &str) -> Result<Repository, &str> {
     let part_after_proto = match repo_str.split_once("://") {
         None => repo_str,
-        Some((_, p)) => p
+        Some((_, p)) => p,
     };
 
     let (prefix, suffix) = match part_after_proto.split_once(':') {
@@ -63,5 +68,8 @@ fn parse_repo_string(repo_str: &str) -> Result<(&str, &str), &str> {
         Some(p) => p,
     };
 
-    Ok((host_part, path_part))
+    Ok(Repository {
+        host: host_part.to_owned(),
+        path: path_part.to_owned(),
+    })
 }
