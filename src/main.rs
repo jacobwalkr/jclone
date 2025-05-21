@@ -1,6 +1,6 @@
 mod repository;
 
-use repository::parse_repo_string;
+use repository::Repository;
 use std::io::{self, Write};
 use std::path::PathBuf;
 use std::process::Command;
@@ -8,8 +8,7 @@ use std::{env, fs};
 
 fn main() {
     let arg_repo = env::args().nth(1).expect("expecting argument: repository");
-
-    let repository = parse_repo_string(&arg_repo).expect("couldn't parse repository");
+    let repository = Repository::try_from(&arg_repo).expect("couldn't parse repository");
 
     let home_dir = env::var("HOME").expect("$HOME isn't set");
 
