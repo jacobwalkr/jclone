@@ -1,3 +1,4 @@
+#[derive(Debug, PartialEq)]
 pub struct Repository {
     pub host: String,
     pub path: String,
@@ -36,5 +37,113 @@ impl TryFrom<&String> for Repository {
             host: host_part.to_owned(),
             path: path_part.to_owned(),
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_empty_string_error() {
+        let repo_str = String::from("");
+
+        assert!(Repository::try_from(&repo_str).is_err());
+    }
+
+    #[test]
+    fn test_ssh_compact() -> Result<(), String> {
+        let repo_str = String::from("example.com:my_repo");
+        let expected = Repository {
+            host: String::from("example.com"),
+            path: String::from("my_repo"),
+        };
+
+        assert_eq!(Repository::try_from(&repo_str)?, expected);
+        Ok(())
+    }
+
+    #[test]
+    fn test_ssh_user() -> Result<(), String> {
+        let repo_str = String::from("git@example.com:my_repo");
+        let expected = Repository {
+            host: String::from("example.com"),
+            path: String::from("my_repo"),
+        };
+
+        assert_eq!(Repository::try_from(&repo_str)?, expected);
+        Ok(())
+    }
+
+    #[test]
+    fn test_ssh_not_git_user() -> Result<(), String> {
+        let repo_str = String::from("someone-else@example.com:my_repo");
+        let expected = Repository {
+            host: String::from("example.com"),
+            path: String::from("my_repo"),
+        };
+
+        assert_eq!(Repository::try_from(&repo_str)?, expected);
+        Ok(())
+    }
+
+    #[test]
+    fn test_ssh_scheme() -> Result<(), String> {
+        let repo_str = String::from("ssh://git@example.com:my_repo");
+        let expected = Repository {
+            host: String::from("example.com"),
+            path: String::from("my_repo"),
+        };
+
+        assert_eq!(Repository::try_from(&repo_str)?, expected);
+        Ok(())
+    }
+
+    #[test]
+    fn test_ssh_scheme_extension() -> Result<(), String> {
+        let repo_str = String::from("ssh://git@example.com:my_repo.git");
+        let expected = Repository {
+            host: String::from("example.com"),
+            path: String::from("my_repo"),
+        };
+
+        assert_eq!(Repository::try_from(&repo_str)?, expected);
+        Ok(())
+    }
+
+    #[test]
+    fn test_ssh_scheme_extension_long_path() -> Result<(), String> {
+        let repo_str = String::from("ssh://git@example.com:my_user/my_group/my_repo.git");
+        let expected = Repository {
+            host: String::from("example.com"),
+            path: String::from("my_user/my_group/my_repo"),
+        };
+
+        assert_eq!(Repository::try_from(&repo_str)?, expected);
+        Ok(())
+    }
+
+    #[test]
+    fn test_ssh_scheme_extension_path_with_starting_slash() -> Result<(), String> {
+        let repo_str = String::from("ssh://git@example.com:/my_user/my_repo.git");
+        let expected = Repository {
+            host: String::from("example.com"),
+            path: String::from("my_user/my_repo"),
+        };
+
+        assert_eq!(Repository::try_from(&repo_str)?, expected);
+        Ok(())
+    }
+
+    #[test]
+    fn test_git_scheme_extension() -> Result<(), String> {
+        let repo_str = String::from("git://git@example.com:my_repo.git");
+        let expected = Repository {
+            host: String::from("example.com"),
+            path: String::from("my_repo"),
+        };
+
+        assert_eq!(Repository::try_from(&repo_str)?, expected);
+        Ok(())
     }
 }
