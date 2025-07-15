@@ -6,3 +6,4 @@ edition = "2024"
 license = "BSD-3-Clause-No-Military-License"
 
 [dependencies]
+rstest = "0.25.0"
