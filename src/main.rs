@@ -1,18 +1,21 @@
+mod configuration;
 mod repository;
 
 use jclone::git_clone;
 use repository::Repository;
-use std::path::PathBuf;
-use std::{env};
+use std::env;
+
+use crate::configuration::Configuration;
 
 fn main() {
+    let home_dir = env::var("HOME").expect("$HOME environment variable not set");
+
     let arg_repo = env::args().nth(1).expect("expecting argument: repository");
+
+    let config = Configuration::with_default_values(&home_dir);
     let repository = Repository::try_from(&arg_repo).expect("couldn't parse repository");
 
-    let home_dir = env::var("HOME").expect("$HOME isn't set");
-
-    let mut target_dir = PathBuf::from(home_dir);
-    target_dir.push("src");
+    let mut target_dir = config.base_dir;
     target_dir.push(repository.host);
     target_dir.push(repository.path);
 
@@ -20,6 +23,6 @@ fn main() {
 
     match git_clone(&arg_repo, &target_dir) {
         Ok(_) => println!("🎉 Done!"),
-        Err(err) => println!("❌ Error: {}", err)
+        Err(err) => println!("❌ Error: {}", err),
     }
 }
