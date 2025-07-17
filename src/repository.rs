@@ -58,8 +58,16 @@ mod tests {
     #[case::ssh_not_git_user("someone-else@example.com:my_repo", "example.com", "my_repo")]
     #[case::ssh_scheme("ssh://git@example.com:my_repo", "example.com", "my_repo")]
     #[case::ssh_scheme_extension("ssh://git@example.com:my_repo.git", "example.com", "my_repo")]
-    #[case::ssh_scheme_extension_long_path("ssh://git@example.com:my_user/my_group/my_repo.git", "example.com", "my_user/my_group/my_repo")]
-    #[case::ssh_scheme_extension_path_with_starting_slash("ssh://git@example.com:/my_user/my_repo.git", "example.com", "my_user/my_repo")]
+    #[case::ssh_scheme_extension_long_path(
+        "ssh://git@example.com:my_user/my_group/my_repo.git",
+        "example.com",
+        "my_user/my_group/my_repo"
+    )]
+    #[case::ssh_scheme_extension_path_with_starting_slash(
+        "ssh://git@example.com:/my_user/my_repo.git",
+        "example.com",
+        "my_user/my_repo"
+    )]
     #[case::git_scheme_extension("git://git@example.com:my_repo.git", "example.com", "my_repo")]
     fn test_repo_string_correctly_converted_to_repository(
         #[case] input: String,
