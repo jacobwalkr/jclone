@@ -3,19 +3,25 @@ mod repository;
 
 use jclone::git_clone;
 use repository::Repository;
-use std::env;
+use std::{env, path::PathBuf};
 
 use crate::configuration::Configuration;
 
 fn main() {
     let home_dir = env::var("HOME").expect("$HOME environment variable not set");
 
-    let arg_repo = env::args().nth(1).expect("expecting argument: repository");
+    let mut config_path = PathBuf::from(&home_dir);
+    config_path.push(".jclone.toml");
 
-    let config = Configuration::with_default_values(&home_dir);
+    let config = match Configuration::from_file(&config_path) {
+        Ok(c) => c,
+        Err(_) => Configuration::with_default_values(&home_dir)
+    };
+
+    let arg_repo = env::args().nth(1).expect("expecting argument: repository");
     let repository = Repository::try_from(&arg_repo).expect("couldn't parse repository");
 
-    let mut target_dir = config.base_dir;
+    let mut target_dir = config.base_dir.clone();
     target_dir.push(repository.host);
     target_dir.push(repository.path);
 
