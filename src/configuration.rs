@@ -1,56 +1,41 @@
 use std::{env, fs, path::PathBuf};
 
-use serde::{Deserialize, Serialize};
-
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
-struct FileConfiguration {
-    base_dir: Option<PathBuf>,
-}
+use toml::Table;
 
 #[derive(Debug, PartialEq)]
 pub struct Configuration {
     pub base_dir: PathBuf,
 }
 
-impl FileConfiguration {
-    fn from_file(path: &PathBuf) -> Option<FileConfiguration> {
-        if !path.exists() { return None };
-
-        let Ok(config_str) = fs::read_to_string(path) else {
-            println!("Failed to read config file");
-            return None
-        };
-
-        match toml::from_str::<FileConfiguration>(&config_str) {
-            Ok(config) => Some(config),
-            Err(err) => {
-                panic!("Failed to parse configuration: {err}");
-            }
-        }
-    }
-}
-
 impl Configuration {
-    fn with_default_values(home_dir: &str) -> Self {
-        let mut target_dir = PathBuf::from(home_dir);
-        target_dir.push("src");
-
+    fn with_default_values(user_values: Table, home: &PathBuf) -> Self {
         Self {
-            base_dir: target_dir,
+            base_dir: user_values.get("base_dir")
+                .and_then(|value| { value.as_str() })
+                .and_then(|base_dir_str| Some(PathBuf::from(base_dir_str)))
+                .unwrap_or_else(|| home.join("src")),
         }
     }
 
     pub fn load() -> Self {
-        let home = env::var("HOME").expect("$HOME environment variable isn't set");
-        let initial = Self::with_default_values(&home);
-
+        let home = PathBuf::from(env::var("HOME").expect("$HOME environment variable isn't set"));
         let config_path = PathBuf::from(&home).join(".jclone.toml");
 
-        FileConfiguration::from_file(&config_path)
-            .and_then(|file_config| {
-                Some(Self { base_dir: file_config.base_dir.unwrap_or(initial.base_dir.to_owned()) })
+        config_path
+            .exists()
+            .then(|| {
+                fs::read_to_string(&config_path)
+                    .unwrap_or_else(|err| panic!("Error reading config file: {err}"))
             })
-            .unwrap_or(initial)
+            .and_then(|config_str| {
+                Some(
+                    config_str
+                        .parse::<Table>()
+                        .unwrap_or_else(|err| panic!("Failed to parse configuration: {err}")),
+                )
+            })
+            .and_then(|config_table| Some(Self::with_default_values(config_table, &home)))
+            .unwrap_or_else(|| Self::with_default_values(Table::new(), &home))
     }
 }
 
@@ -59,12 +44,26 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_with_default_values_generates_expected_defaults() {
-        let home_dir = String::from("/some/directory");
-        let mut base_dir = PathBuf::from(&home_dir);
-        base_dir.push("src");
+    fn test_with_default_values_with_empty_table_generates_expected_defaults() {
+        let empty_table = Table::new();
+        let home_dir = PathBuf::from("/some/directory");
+        let base_dir = home_dir.join("src");
 
-        let actual = Configuration::with_default_values(&home_dir);
+        let actual = Configuration::with_default_values(empty_table, &home_dir);
+        let expected = Configuration { base_dir };
+
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn test_with_default_values_with_complete_table_generates_expected_defaults() {
+        let table = r#"
+            base_dir = "/some/other/directory"
+        "#.parse::<Table>().unwrap();
+        let home_dir = PathBuf::from("/some/directory");
+        let base_dir = PathBuf::from("/some/other/directory");
+
+        let actual = Configuration::with_default_values(table, &home_dir);
         let expected = Configuration { base_dir };
 
         assert_eq!(actual, expected);
