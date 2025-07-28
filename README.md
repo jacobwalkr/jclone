@@ -39,3 +39,24 @@ Cloning repository to "/your/base/path/github.com/rust-lang/rustlings"...
 🎉 Done!
 
 ```
+
+# Planned features
+
+- [x] Clone a repository
+- [x] Clone to a default base directory
+- [x] Configurable base directory
+- [ ] Toggleable host directory (e.g. `.../github.com/`)
+- [ ] Toggleable full path
+- [ ] Per-host configuration by exact match on host
+- [ ] Per-host configuration by pattern matching host
+- [ ] Stream git output so user can see clone progress
+- [ ] Quiet option to suppress all output
+- [ ] Git-only output option so only git output is printed
+- [ ] Check repo exists before creating any directories
+- [ ] Tidy up any created directories on error
+- [ ] Pass git args to command
+- [ ] Configure default git args
+- [ ] Check several locations for config file
+- [ ] deb/rpm packages
+- [ ] Automated releases
+- [ ] Windows support lol
