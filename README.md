@@ -30,13 +30,14 @@ You can configure jclone by creating a configuration file at `$HOME/.jclone.toml
 ```toml
 base_dir = "/your/base/path" # defaults to "$HOME/src"
 use_host_dir: false # default: true
+use_full_path: fale # default: true
 ```
 
 Yields:
 
 ```
 $ jclone git@github.com:rust-lang/rustlings.git
-Cloning repository to "/your/base/path/rust-lang/rustlings"...
+Cloning repository to "/your/base/path/rustlings"...
 🎉 Done!
 
 ```
@@ -47,7 +48,7 @@ Cloning repository to "/your/base/path/rust-lang/rustlings"...
 - [x] Clone to a default base directory
 - [x] Configurable base directory
 - [x] Toggleable host directory (e.g. `.../github.com/`)
-- [ ] Toggleable full path
+- [x] Toggleable full path
 - [ ] Per-host configuration by exact match on host
 - [ ] Per-host configuration by pattern matching host
 - [ ] Stream git output so user can see clone progress
@@ -61,3 +62,10 @@ Cloning repository to "/your/base/path/rust-lang/rustlings"...
 - [ ] deb/rpm packages
 - [ ] Automated releases
 - [ ] Windows support lol
+
+## Changes needed to support Windows
+
+Noting here any of the changes I might need to make when I look at supporting Windows.
+
+- Specific references to environment, specifically `$HOME` - might be better to use the dir or dirs crate
+- The `target_dir` method refers to Windows-specific `Prefix` that might need to be handled

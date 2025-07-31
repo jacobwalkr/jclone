@@ -1,4 +1,5 @@
 use std::io::{self, Write};
+use std::path::Component;
 use std::{fs, path::PathBuf, process::Command};
 
 use crate::configuration::Configuration;
@@ -15,11 +16,14 @@ fn target_dir(repo: &Repository, config: &Configuration) -> PathBuf {
     }
 
     let repo_path = PathBuf::from(&repo.path);
+    let mut components = repo_path.components().peekable();
 
-    if repo_path.is_absolute() {
-        dir.push(repo_path.strip_prefix("/").unwrap_or(&repo_path));
-    } else {
-        dir.push(repo_path);
+    while let Some(component) = components.next() {
+        match component {
+            Component::Prefix(_) | Component::RootDir => (),
+            _ if !config.use_full_path && components.peek().is_some() => (),
+            _ => dir.push(component),
+        };
     }
 
     dir
@@ -85,6 +89,7 @@ mod tests {
         Configuration {
             base_dir: PathBuf::from("/home/ferris/src"),
             use_host_dir: true,
+            use_full_path: true,
         }
     }
 
@@ -128,6 +133,22 @@ mod tests {
         assert_eq!(
             target_dir(&repo, &default_config),
             PathBuf::from("/home/ferris/src/example.com/some/absolute/path")
+        )
+    }
+
+    #[rstest]
+    fn test_target_dir_uses_only_project_name_when_use_full_path_is_false(
+        default_repo: Repository,
+        default_config: Configuration,
+    ) {
+        let config = Configuration {
+            use_full_path: false,
+            ..default_config
+        };
+
+        assert_eq!(
+            target_dir(&default_repo, &config),
+            PathBuf::from("/home/ferris/src/example.com/path")
         )
     }
 }
