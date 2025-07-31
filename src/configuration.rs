@@ -5,15 +5,21 @@ use toml::Table;
 #[derive(Debug, PartialEq)]
 pub struct Configuration {
     pub base_dir: PathBuf,
+    pub use_host_dir: bool,
 }
 
 impl Configuration {
     fn with_default_values(user_values: Table, home: &PathBuf) -> Self {
         Self {
-            base_dir: user_values.get("base_dir")
-                .and_then(|value| { value.as_str() })
+            base_dir: user_values
+                .get("base_dir")
+                .and_then(|value| value.as_str())
                 .and_then(|base_dir_str| Some(PathBuf::from(base_dir_str)))
                 .unwrap_or_else(|| home.join("src")),
+            use_host_dir: user_values
+                .get("use_host_dir")
+                .and_then(|value| value.as_bool())
+                .unwrap_or(true),
         }
     }
 
@@ -47,10 +53,12 @@ mod tests {
     fn test_with_default_values_with_empty_table_generates_expected_defaults() {
         let empty_table = Table::new();
         let home_dir = PathBuf::from("/some/directory");
-        let base_dir = home_dir.join("src");
 
         let actual = Configuration::with_default_values(empty_table, &home_dir);
-        let expected = Configuration { base_dir };
+        let expected = Configuration {
+            base_dir: home_dir.join("src"),
+            use_host_dir: true,
+        };
 
         assert_eq!(actual, expected);
     }
@@ -59,12 +67,17 @@ mod tests {
     fn test_with_default_values_with_complete_table_generates_expected_defaults() {
         let table = r#"
             base_dir = "/some/other/directory"
-        "#.parse::<Table>().unwrap();
+            use_host_dir = false
+        "#
+        .parse::<Table>()
+        .unwrap();
         let home_dir = PathBuf::from("/some/directory");
-        let base_dir = PathBuf::from("/some/other/directory");
 
         let actual = Configuration::with_default_values(table, &home_dir);
-        let expected = Configuration { base_dir };
+        let expected = Configuration {
+            base_dir: PathBuf::from("/some/other/directory"),
+            use_host_dir: false,
+        };
 
         assert_eq!(actual, expected);
     }

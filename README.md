@@ -45,7 +45,7 @@ Cloning repository to "/your/base/path/github.com/rust-lang/rustlings"...
 - [x] Clone a repository
 - [x] Clone to a default base directory
 - [x] Configurable base directory
-- [ ] Toggleable host directory (e.g. `.../github.com/`)
+- [x] Toggleable host directory (e.g. `.../github.com/`)
 - [ ] Toggleable full path
 - [ ] Per-host configuration by exact match on host
 - [ ] Per-host configuration by pattern matching host
