@@ -25,17 +25,18 @@ Cloning repository to "/home/jacob/src/github.com/rust-lang/rustlings"...
 
 # Configuration
 
-You can optionally configure the base path by creating a configuration file at `$HOME/.jclone.toml`:
+You can configure jclone by creating a configuration file at `$HOME/.jclone.toml`:
 
 ```toml
-base_dir = "/your/base/path"
+base_dir = "/your/base/path" # defaults to "$HOME/src"
+use_host_dir: false # default: true
 ```
 
 Yields:
 
 ```
 $ jclone git@github.com:rust-lang/rustlings.git
-Cloning repository to "/your/base/path/github.com/rust-lang/rustlings"...
+Cloning repository to "/your/base/path/rust-lang/rustlings"...
 🎉 Done!
 
 ```
