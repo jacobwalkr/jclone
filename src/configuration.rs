@@ -1,4 +1,4 @@
-use std::{env, fs, path::PathBuf};
+use std::{env, fs, path::{Path, PathBuf}};
 
 use toml::Table;
 
@@ -9,12 +9,12 @@ pub struct Configuration {
 }
 
 impl Configuration {
-    fn with_default_values(user_values: Table, home: &PathBuf) -> Self {
+    fn with_default_values(user_values: Table, home: &Path) -> Self {
         Self {
             base_dir: user_values
                 .get("base_dir")
                 .and_then(|value| value.as_str())
-                .and_then(|base_dir_str| Some(PathBuf::from(base_dir_str)))
+                .map(PathBuf::from)
                 .unwrap_or_else(|| home.join("src")),
             use_host_dir: user_values
                 .get("use_host_dir")
@@ -33,14 +33,13 @@ impl Configuration {
                 fs::read_to_string(&config_path)
                     .unwrap_or_else(|err| panic!("Error reading config file: {err}"))
             })
-            .and_then(|config_str| {
-                Some(
+            .map(|config_str| {
                     config_str
                         .parse::<Table>()
-                        .unwrap_or_else(|err| panic!("Failed to parse configuration: {err}")),
+                        .unwrap_or_else(|err| panic!("Failed to parse configuration: {err}"),
                 )
             })
-            .and_then(|config_table| Some(Self::with_default_values(config_table, &home)))
+            .map(|config_table| Self::with_default_values(config_table, &home))
             .unwrap_or_else(|| Self::with_default_values(Table::new(), &home))
     }
 }
