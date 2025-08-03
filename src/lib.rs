@@ -7,6 +7,7 @@ use crate::repository::Repository;
 
 mod configuration;
 mod repository;
+mod user_configuration;
 
 fn target_dir(repo: &Repository, config: &Configuration) -> PathBuf {
     let mut dir = PathBuf::from(&config.base_dir);

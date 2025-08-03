@@ -30,7 +30,7 @@ You can configure jclone by creating a configuration file at `$HOME/.jclone.toml
 ```toml
 base_dir = "/your/base/path" # defaults to "$HOME/src"
 use_host_dir: false # default: true
-use_full_path: fale # default: true
+use_full_path: false # default: true
 ```
 
 Yields:

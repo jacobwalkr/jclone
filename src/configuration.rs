@@ -1,9 +1,9 @@
 use std::{
-    env, fs,
+    env,
     path::{Path, PathBuf},
 };
 
-use toml::Table;
+use crate::user_configuration::UserConfiguration;
 
 #[derive(Debug, PartialEq)]
 pub struct Configuration {
@@ -13,54 +13,34 @@ pub struct Configuration {
 }
 
 impl Configuration {
-    fn with_default_values(user_values: Table, home: &Path) -> Self {
+    fn from_user_configuration(user_config: UserConfiguration, home: &Path) -> Self {
         Self {
-            base_dir: user_values
-                .get("base_dir")
-                .and_then(|value| value.as_str())
-                .map(PathBuf::from)
-                .unwrap_or_else(|| home.join("src")),
-            use_host_dir: user_values
-                .get("use_host_dir")
-                .and_then(|value| value.as_bool())
-                .unwrap_or(true),
-            use_full_path: user_values
-                .get("use_full_path")
-                .and_then(|value| value.as_bool())
-                .unwrap_or(true),
+            base_dir: user_config.base_dir.unwrap_or_else(|| home.join("src")),
+            use_host_dir: user_config.use_host_dir.unwrap_or(true),
+            use_full_path: user_config.use_full_path.unwrap_or(true),
         }
     }
 
     pub fn load() -> Self {
+        let user_config = UserConfiguration::load().unwrap_or_default();
         let home = PathBuf::from(env::var("HOME").expect("$HOME environment variable isn't set"));
-        let config_path = PathBuf::from(&home).join(".jclone.toml");
 
-        config_path
-            .exists()
-            .then(|| {
-                fs::read_to_string(&config_path)
-                    .unwrap_or_else(|err| panic!("Error reading config file: {err}"))
-            })
-            .map(|config_str| {
-                config_str
-                    .parse::<Table>()
-                    .unwrap_or_else(|err| panic!("Failed to parse configuration: {err}"))
-            })
-            .map(|config_table| Self::with_default_values(config_table, &home))
-            .unwrap_or_else(|| Self::with_default_values(Table::new(), &home))
+        Self::from_user_configuration(user_config, &home)
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::user_configuration::UserConfiguration;
+
     use super::*;
 
     #[test]
-    fn test_with_default_values_with_empty_table_generates_expected_defaults() {
-        let empty_table = Table::new();
+    fn test_from_user_configuration_with_default_user_config_generates_expected_defaults() {
+        let default_user_config = UserConfiguration::default();
         let home_dir = PathBuf::from("/some/directory");
 
-        let actual = Configuration::with_default_values(empty_table, &home_dir);
+        let actual = Configuration::from_user_configuration(default_user_config, &home_dir);
         let expected = Configuration {
             base_dir: home_dir.join("src"),
             use_host_dir: true,
@@ -71,17 +51,16 @@ mod tests {
     }
 
     #[test]
-    fn test_with_default_values_with_complete_table_generates_expected_configuration() {
-        let table = r#"
-            base_dir = "/some/other/directory"
-            use_host_dir = false
-            use_full_path = false
-        "#
-        .parse::<Table>()
-        .unwrap();
-        let home_dir = PathBuf::from("/some/directory");
+    fn test_from_user_configuration_with_complete_user_config_generates_expected_configuration() {
+        let user_config = UserConfiguration {
+            base_dir: Some(PathBuf::from("/some/other/directory")),
+            use_host_dir: Some(false),
+            use_full_path: Some(false),
+        };
 
-        let actual = Configuration::with_default_values(table, &home_dir);
+        let home_dir = PathBuf::from("/some/directory");
+        let actual = Configuration::from_user_configuration(user_config, &home_dir);
+
         let expected = Configuration {
             base_dir: PathBuf::from("/some/other/directory"),
             use_host_dir: false,
