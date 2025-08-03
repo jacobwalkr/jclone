@@ -5,7 +5,7 @@ use serde::Deserialize;
 #[derive(Deserialize, Debug, PartialEq, Default)]
 #[serde(deny_unknown_fields)]
 pub struct UserConfiguration {
-    pub base_dir: Option<PathBuf>,
+    pub base_dir: Option<String>,
     pub use_host_dir: Option<bool>,
     pub use_full_path: Option<bool>,
 }
@@ -46,7 +46,7 @@ mod tests {
         );
 
         let expected = UserConfiguration {
-            base_dir: Some(PathBuf::from("/base/dir")),
+            base_dir: Some(String::from("/base/dir")),
             use_host_dir: Some(false),
             use_full_path: Some(true),
         };

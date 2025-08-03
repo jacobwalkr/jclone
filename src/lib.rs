@@ -88,7 +88,7 @@ mod tests {
     #[fixture]
     fn default_config() -> Configuration {
         Configuration {
-            base_dir: PathBuf::from("/home/ferris/src"),
+            base_dir: String::from("/home/ferris/src"),
             use_host_dir: true,
             use_full_path: true,
         }
