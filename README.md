@@ -72,7 +72,7 @@ Config values from the first matching variant for a given host, if any, come fir
 - [ ] Stream git output so user can see clone progress
 - [ ] Quiet option to suppress all output
 - [ ] Git-only output option so only git output is printed
-- [ ] Check repo exists before creating any directories
+- [x] Check repo exists before creating any directories
 - [ ] Tidy up any created directories on error
 - [ ] Pass git args to command
 - [ ] Configure default git args
