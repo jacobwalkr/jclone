@@ -1,7 +1,8 @@
 [package]
 name = "jclone"
 description = "A command line tool for cloning and organising git repositories"
-version = "0.4.0"
+authors = ["Jacob Walker <jacob@jacobwalker.dev>"]
+version = "0.4.1"
 edition = "2024"
 license = "BSD-3-Clause-No-Military-License"
 readme = "README.md"
