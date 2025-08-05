@@ -31,8 +31,8 @@ fn target_dir(repo: &Repository, config: &Configuration) -> PathBuf {
 }
 
 pub fn jclone(repo_str: String) {
-    let config = Configuration::load();
     let repository = Repository::try_from(&repo_str).expect("couldn't parse repository");
+    let config = Configuration::load(&repository.host);
     let target_dir = target_dir(&repository, &config);
 
     println!("Cloning repository to {:?}...", &target_dir);

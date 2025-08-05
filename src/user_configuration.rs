@@ -8,6 +8,18 @@ pub struct UserConfiguration {
     pub base_dir: Option<String>,
     pub use_host_dir: Option<bool>,
     pub use_full_path: Option<bool>,
+    #[serde(default)]
+    #[serde(rename = "variant")]
+    pub variants: Vec<UserHostConfiguration>,
+}
+
+#[derive(Deserialize, Debug, PartialEq, Default, Clone)]
+#[serde(deny_unknown_fields)]
+pub struct UserHostConfiguration {
+    pub host: String,
+    pub base_dir: Option<String>,
+    pub use_host_dir: Option<bool>,
+    pub use_full_path: Option<bool>,
 }
 
 impl From<String> for UserConfiguration {
@@ -17,6 +29,13 @@ impl From<String> for UserConfiguration {
 }
 
 impl UserConfiguration {
+    pub fn variant_matching_host(&self, host: &String) -> UserHostConfiguration {
+        self.variants
+            .iter()
+            .find(|variant| variant.host == *host)
+            .map_or_else(UserHostConfiguration::default, |v| v.to_owned())
+    }
+
     pub fn load() -> Option<Self> {
         let home = PathBuf::from(env::var("HOME").expect("$HOME environment variable isn't set"));
         let config_path = PathBuf::from(&home).join(".jclone.toml");
@@ -36,7 +55,22 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_user_configuration_load_can_deserialize_complete_user_configuration() {
+    fn test_user_configuration_load_can_deserialize_empty_file() {
+        let user_config_str = String::from("");
+        let actual = UserConfiguration::from(user_config_str);
+
+        let default_config = UserConfiguration {
+            base_dir: None,
+            use_host_dir: None,
+            use_full_path: None,
+            variants: vec![],
+        };
+
+        assert_eq!(actual, default_config);
+    }
+
+    #[test]
+    fn test_user_configuration_load_can_deserialize_user_configuration_without_variants() {
         let user_config_str = String::from(
             r#"
             base_dir = "/base/dir"
@@ -49,6 +83,7 @@ mod tests {
             base_dir: Some(String::from("/base/dir")),
             use_host_dir: Some(false),
             use_full_path: Some(true),
+            variants: vec![],
         };
 
         let actual = UserConfiguration::from(user_config_str);
@@ -57,17 +92,50 @@ mod tests {
     }
 
     #[test]
-    fn test_user_configuration_load_can_deserialize_empty_file() {
-        let user_config_str = String::from("");
-        let actual = UserConfiguration::from(user_config_str);
+    fn test_user_configuration_load_can_deserialize_complete_user_configuration() {
+        let user_config_str = String::from(
+            r#"
+            base_dir = "/base/dir"
+            use_host_dir = false
+            use_full_path = true
 
-        let default_config = UserConfiguration {
-            base_dir: None,
-            use_host_dir: None,
-            use_full_path: None,
+            [[variant]]
+            host = "example.com"
+            base_dir = "/second/dir"
+            use_host_dir = true
+            use_full_path = true
+
+            [[variant]]
+            host = "example.net"
+            base_dir = "/third/dir"
+            use_host_dir = false
+            use_full_path = false
+            "#,
+        );
+
+        let expected = UserConfiguration {
+            base_dir: Some(String::from("/base/dir")),
+            use_host_dir: Some(false),
+            use_full_path: Some(true),
+            variants: vec![
+                UserHostConfiguration {
+                    host: String::from("example.com"),
+                    base_dir: Some(String::from("/second/dir")),
+                    use_host_dir: Some(true),
+                    use_full_path: Some(true),
+                },
+                UserHostConfiguration {
+                    host: String::from("example.net"),
+                    base_dir: Some(String::from("/third/dir")),
+                    use_host_dir: Some(false),
+                    use_full_path: Some(false),
+                },
+            ],
         };
 
-        assert_eq!(actual, default_config);
+        let actual = UserConfiguration::from(user_config_str);
+
+        assert_eq!(actual, expected);
     }
 
     #[test]
@@ -80,5 +148,61 @@ mod tests {
         );
 
         let _ = UserConfiguration::from(user_config_str);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_user_configuration_load_panics_denies_unknown_fields_in_variants() {
+        let user_config_str = String::from(
+            r#"
+            [[variant]]
+            unexpected = "I shouldn't be here"
+            "#,
+        );
+
+        let _ = UserConfiguration::from(user_config_str);
+    }
+
+    #[test]
+    fn test_variant_matching_host_when_one_matching() {
+        let host = String::from("example.com");
+
+        let user_config = UserConfiguration {
+            variants: vec![UserHostConfiguration {
+                host: String::from("example.com"),
+                base_dir: Some(String::from("/some/other/directory")),
+                ..UserHostConfiguration::default()
+            }],
+            ..UserConfiguration::default()
+        };
+
+        let actual = user_config.variant_matching_host(&host);
+
+        let expected = UserHostConfiguration {
+            host: String::from("example.com"),
+            base_dir: Some(String::from("/some/other/directory")),
+            ..UserHostConfiguration::default()
+        };
+
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn test_variant_matching_host_when_none_matching() {
+        let host = String::from("no-match.example.net");
+
+        let user_config = UserConfiguration {
+            variants: vec![UserHostConfiguration {
+                host: String::from("example.com"),
+                base_dir: Some(String::from("/some/other/directory")),
+                ..UserHostConfiguration::default()
+            }],
+            ..UserConfiguration::default()
+        };
+
+        let actual = user_config.variant_matching_host(&host);
+        let expected = UserHostConfiguration::default();
+
+        assert_eq!(actual, expected);
     }
 }

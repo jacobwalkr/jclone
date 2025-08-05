@@ -28,19 +28,37 @@ Cloning repository to "/home/jacob/src/github.com/rust-lang/rustlings"...
 You can configure jclone by creating a configuration file at `$HOME/.jclone.toml`:
 
 ```toml
-base_dir = "/your/base/path" # defaults to "$HOME/src"
-use_host_dir: false # default: true
-use_full_path: false # default: true
+base_dir = "/home/ferris/code" # defaults to "$HOME/src"
+use_host_dir = false # default: true
+use_full_path = false # default: true
+
+[[variant]]
+host = "git.example.com"
+base_dir = "/home/ferris/work"
+use_full_path = true
 ```
 
 Yields:
 
 ```
 $ jclone git@github.com:rust-lang/rustlings.git
-Cloning repository to "/your/base/path/rustlings"...
+Cloning repository to "/home/ferris/code/rustlings"...
 🎉 Done!
 
 ```
+
+or:
+
+```
+$ jclone git@git.example.com:my-department/backend/big-project.git
+Cloning repository to "/home/ferris/work/my-department/backend/big-project.git"...
+🎉 Done!
+
+```
+
+## Configuration precedence
+
+Config values from the first matching variant for a given host, if any, come first. Any missing values are filled in from your base user config (the settings not in any variant) and then from jclone defaults.
 
 # Planned features
 
@@ -49,7 +67,7 @@ Cloning repository to "/your/base/path/rustlings"...
 - [x] Configurable base directory
 - [x] Toggleable host directory (e.g. `.../github.com/`)
 - [x] Toggleable full path
-- [ ] Per-host configuration by exact match on host
+- [x] Per-host configuration by exact match on host
 - [ ] Per-host configuration by pattern matching host
 - [ ] Stream git output so user can see clone progress
 - [ ] Quiet option to suppress all output
