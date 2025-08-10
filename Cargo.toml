@@ -4,7 +4,7 @@ description = "A command line tool for cloning and organising git repositories"
 authors = ["Jacob Walker <jacob@jacobwalker.dev>"]
 version = "0.4.1"
 edition = "2024"
-license = "BSD-3-Clause-No-Military-License"
+license = "BSD-3-Clause"
 readme = "README.md"
 repository = "https://github.com/jacobwalkr/jclone"
 
@@ -34,7 +34,7 @@ assets = [
 [package.metadata.generate-rpm]
 requires = { "git" = "*" }
 auto-req = "no"
-license = "BSD-3-Clause-No-Military-License"
+license = "BSD-3-Clause"
 assets = [
     { source = "target/release/jclone", dest = "/usr/bin/jclone", mode = "755" }
 ]
