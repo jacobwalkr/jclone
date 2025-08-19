@@ -3,9 +3,13 @@ Jacob's Clone Tool (jclone)
 
 https://naff.software
 
-A command line tool for cloning and organising git repositories, written in Rust.
+A command line tool for cloning and organising git repositories, ~~over-engineered~~ _finely-crafted_ in Rust.
 
 What can I say? I like to keep my repos organised.
+
+# Download
+
+[Head to the releases](https://github.com/jacobwalkr/jclone/releases) and download latest version as a compiled binary or a package for your preferred flavour of Linux. If you use the binary, don't forget to make sure it's placed somewhere in your `$PATH`!
 
 # Usage
 
