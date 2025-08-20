@@ -2,12 +2,24 @@ use std::{env, fs, path::PathBuf};
 
 use serde::Deserialize;
 
+#[derive(Deserialize, Debug, PartialEq, Default, Clone)]
+#[serde(rename_all = "kebab-case")]
+pub enum OutputStyle {
+    #[default]
+    Default,
+    GitOnly,
+    NoGit,
+    Quiet,
+}
+
 #[derive(Deserialize, Debug, PartialEq, Default)]
 #[serde(deny_unknown_fields)]
 pub struct UserConfiguration {
     pub base_dir: Option<String>,
     pub use_host_dir: Option<bool>,
     pub use_full_path: Option<bool>,
+    #[serde(rename = "output")]
+    pub output_style: Option<OutputStyle>,
     #[serde(default)]
     #[serde(rename = "variant")]
     pub variants: Vec<UserHostConfiguration>,
@@ -20,6 +32,8 @@ pub struct UserHostConfiguration {
     pub base_dir: Option<String>,
     pub use_host_dir: Option<bool>,
     pub use_full_path: Option<bool>,
+    #[serde(rename = "output")]
+    pub output_style: Option<OutputStyle>,
 }
 
 impl From<String> for UserConfiguration {
@@ -63,6 +77,7 @@ mod tests {
             base_dir: None,
             use_host_dir: None,
             use_full_path: None,
+            output_style: None,
             variants: vec![],
         };
 
@@ -76,6 +91,7 @@ mod tests {
             base_dir = "/base/dir"
             use_host_dir = false
             use_full_path = true
+            output = "no-git"
             "#,
         );
 
@@ -83,6 +99,7 @@ mod tests {
             base_dir: Some(String::from("/base/dir")),
             use_host_dir: Some(false),
             use_full_path: Some(true),
+            output_style: Some(OutputStyle::NoGit),
             variants: vec![],
         };
 
@@ -98,18 +115,21 @@ mod tests {
             base_dir = "/base/dir"
             use_host_dir = false
             use_full_path = true
+            output = "git-only"
 
             [[variant]]
             host = "example.com"
             base_dir = "/second/dir"
             use_host_dir = true
             use_full_path = true
+            output = "default"
 
             [[variant]]
             host = "example.net"
             base_dir = "/third/dir"
             use_host_dir = false
             use_full_path = false
+            output = "quiet"
             "#,
         );
 
@@ -117,18 +137,21 @@ mod tests {
             base_dir: Some(String::from("/base/dir")),
             use_host_dir: Some(false),
             use_full_path: Some(true),
+            output_style: Some(OutputStyle::GitOnly),
             variants: vec![
                 UserHostConfiguration {
                     host: String::from("example.com"),
                     base_dir: Some(String::from("/second/dir")),
                     use_host_dir: Some(true),
                     use_full_path: Some(true),
+                    output_style: Some(OutputStyle::Default),
                 },
                 UserHostConfiguration {
                     host: String::from("example.net"),
                     base_dir: Some(String::from("/third/dir")),
                     use_host_dir: Some(false),
                     use_full_path: Some(false),
+                    output_style: Some(OutputStyle::Quiet),
                 },
             ],
         };

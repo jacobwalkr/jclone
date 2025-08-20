@@ -1,6 +1,6 @@
 use std::io::{self, Write};
 use std::path::Path;
-use std::process::{Output, Command};
+use std::process::{Command, Output};
 
 fn write_out(output: &Output) -> Result<(), String> {
     match io::stdout().write_all(&output.stdout) {

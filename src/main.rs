@@ -61,6 +61,8 @@ fn target_dir(repo: &Repository, config: &Configuration) -> PathBuf {
 mod tests {
     use rstest::{fixture, rstest};
 
+    use crate::user_configuration::OutputStyle;
+
     use super::*;
 
     #[fixture]
@@ -77,6 +79,7 @@ mod tests {
             base_dir: String::from("/home/ferris/src"),
             use_host_dir: true,
             use_full_path: true,
+            output_style: OutputStyle::default(),
         }
     }
 

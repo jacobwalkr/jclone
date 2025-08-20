@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `output` config field
+
 ### Changed
 
 - Send `git clone` progress output to stdout instead of "Cloning into..." message

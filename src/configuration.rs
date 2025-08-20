@@ -3,13 +3,14 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use crate::user_configuration::UserConfiguration;
+use crate::user_configuration::{OutputStyle, UserConfiguration};
 
 #[derive(Debug, PartialEq)]
 pub struct Configuration {
     pub base_dir: String,
     pub use_host_dir: bool,
     pub use_full_path: bool,
+    pub output_style: OutputStyle,
 }
 
 impl Configuration {
@@ -29,6 +30,10 @@ impl Configuration {
                 .use_full_path
                 .or(user_config.use_full_path)
                 .unwrap_or(true),
+            output_style: host_variant
+                .output_style
+                .or(user_config.output_style)
+                .unwrap_or_default(),
         }
     }
 
@@ -56,6 +61,7 @@ mod tests {
             base_dir: Some(String::from("/some/other/directory")),
             use_host_dir: Some(false),
             use_full_path: Some(false),
+            output_style: Some(OutputStyle::Quiet),
             variants: Default::default(),
         }
     }
@@ -74,6 +80,7 @@ mod tests {
                     base_dir: Some(String::from("/dir/example-com")),
                     use_host_dir: Some(true),
                     use_full_path: Some(true),
+                    output_style: Some(OutputStyle::GitOnly),
                 },
             ],
             ..base_user_config()
@@ -91,6 +98,7 @@ mod tests {
             base_dir: String::from("/some/directory/src"),
             use_host_dir: true,
             use_full_path: true,
+            output_style: OutputStyle::Default,
         };
 
         assert_eq!(actual, expected);
@@ -106,6 +114,7 @@ mod tests {
             base_dir: String::from("/some/other/directory"),
             use_host_dir: false,
             use_full_path: false,
+            output_style: OutputStyle::Quiet,
         };
 
         assert_eq!(actual, expected);
@@ -121,6 +130,7 @@ mod tests {
             base_dir: String::from("/some/other/directory"),
             use_host_dir: false,
             use_full_path: false,
+            output_style: OutputStyle::Quiet,
         };
 
         assert_eq!(actual, expected);
@@ -136,6 +146,7 @@ mod tests {
             base_dir: String::from("/dir/example-com"),
             use_host_dir: true,
             use_full_path: true,
+            output_style: OutputStyle::GitOnly,
         };
 
         assert_eq!(actual, expected);
@@ -158,6 +169,7 @@ mod tests {
             base_dir: String::from("/dir/example-org"),
             use_host_dir: false,
             use_full_path: true,
+            output_style: OutputStyle::Quiet,
         };
 
         assert_eq!(actual, expected);

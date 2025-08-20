@@ -38,11 +38,13 @@ You can configure jclone by creating a configuration file at `$HOME/.jclone.toml
 base_dir = "/home/ferris/code" # defaults to "$HOME/src"
 use_host_dir = false # default: true
 use_full_path = false # default: true
+output = "git-only" # options: "git-only", "no-git", "quiet", "default"
 
 [[variant]]
 host = "git.example.com"
 base_dir = "/home/ferris/work"
 use_full_path = true
+output = "default"
 ```
 
 Yields something like:
