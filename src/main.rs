@@ -14,26 +14,28 @@ mod user_configuration;
 fn main() {
     let arg_repo = env::args().nth(1).expect("expecting argument: repository");
 
-    match jclone(arg_repo) {
-        Ok(_) => println!("🎉 Done!"),
-        Err(err) => println!("❌ Error: {err}"),
-    }
+    jclone(arg_repo).unwrap_or_else(|err| println!("❌ Error: {err}"));
 }
 
-pub fn jclone(repo_str: String) -> Result<(), String> {
-    let repository = Repository::try_from(&repo_str).expect("couldn't parse repository");
+fn jclone(repo_str: String) -> Result<(), String> {
+    let repository = Repository::try_from(&repo_str)?;
     let config = Configuration::load(&repository.host);
     let target_dir = target_dir(&repository, &config);
 
-    match git::can_access_remote(&repo_str) {
-        Ok(true) => fs::create_dir_all(&target_dir).expect("error creating clone directory"),
-        Ok(false) => return Err(String::from("can't access repository")),
-        Err(err) => return Err(err),
-    }
-
+    git::can_access_remote(&repo_str)?;
+    create_target_dir(&target_dir)?;
     git::clone(&repo_str, &target_dir)?;
 
+    println!("🎉 Done!");
+
     Ok(())
+}
+
+fn create_target_dir(target_dir: &PathBuf) -> Result<(), String> {
+    match fs::create_dir_all(target_dir) {
+        Ok(_) => Ok(()),
+        Err(err) => Err(format!("error creating directory: {err}")),
+    }
 }
 
 fn target_dir(repo: &Repository, config: &Configuration) -> PathBuf {

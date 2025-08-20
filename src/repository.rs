@@ -14,9 +14,9 @@ impl TryFrom<&String> for Repository {
         };
 
         let (prefix, suffix) = match part_after_proto.split_once(':') {
-            Some(("", _)) | Some((_, "")) | None => return Err("unexpected format".to_owned()),
+            Some(("", _)) | Some((_, "")) | None => return Err(String::from("unexpected format")),
             Some((prefix, _)) if prefix.contains('/') => {
-                return Err("looks like local path".to_owned());
+                return Err(String::from("looks like local path"));
             }
             Some(parts) => parts,
         };
