@@ -16,7 +16,7 @@ fn main() {
 
     match jclone(arg_repo) {
         Ok(_) => println!("🎉 Done!"),
-        Err(err) => println!("❌ Error: {}", err),
+        Err(err) => println!("❌ Error: {err}"),
     }
 }
 
