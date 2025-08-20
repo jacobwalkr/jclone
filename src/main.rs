@@ -1,4 +1,5 @@
 use std::env;
+use std::fs;
 use std::path::Component;
 use std::path::PathBuf;
 
@@ -25,12 +26,10 @@ pub fn jclone(repo_str: String) -> Result<(), String> {
     let target_dir = target_dir(&repository, &config);
 
     match git::can_access_remote(&repo_str) {
-        Ok(true) => (),
+        Ok(true) => fs::create_dir_all(&target_dir).expect("error creating clone directory"),
         Ok(false) => return Err(String::from("can't access repository")),
         Err(err) => return Err(err),
     }
-
-    println!("Cloning repository to {}...", target_dir.display());
 
     git::clone(&repo_str, &target_dir)?;
 

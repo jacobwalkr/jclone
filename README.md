@@ -22,9 +22,12 @@ $ jclone git@github.com:rust-lang/rustlings.git
 Gives you:
 
 ```
-Cloning repository to "/home/jacob/src/github.com/rust-lang/rustlings"...
+$ jclone git@github.com:rust-lang/rustlings.git
+Cloning into '/home/ferris/src/rust-lang/rustlings'...
+remote: Enumerating objects: 14038, done.
+... more git output
+Resolving deltas: 100% (8076/8076), done
 🎉 Done!
-
 ```
 
 # Configuration
@@ -42,22 +45,26 @@ base_dir = "/home/ferris/work"
 use_full_path = true
 ```
 
-Yields:
+Yields something like:
 
 ```
 $ jclone git@github.com:rust-lang/rustlings.git
-Cloning repository to "/home/ferris/code/rustlings"...
+Cloning into '/home/ferris/code/rustlings'...
+remote: Enumerating objects: 14038, done.
+... more git output
+Resolving deltas: 100% (8076/8076), done
 🎉 Done!
-
 ```
 
 or:
 
 ```
 $ jclone git@git.example.com:my-department/backend/big-project.git
-Cloning repository to "/home/ferris/work/my-department/backend/big-project.git"...
+Cloning into '/home/ferris/work/my-department/backend/big-project.git'...
+...
+... more git output
+...
 🎉 Done!
-
 ```
 
 ## Configuration precedence
@@ -73,7 +80,7 @@ Config values from the first matching variant for a given host, if any, come fir
 - [x] Toggleable full path
 - [x] Per-host configuration by exact match on host
 - [ ] Per-host configuration by pattern matching host
-- [ ] Stream git output so user can see clone progress
+- [x] Stream git output so user can see clone progress
 - [ ] Quiet option to suppress all output
 - [ ] Git-only output option so only git output is printed
 - [x] Check repo exists before creating any directories

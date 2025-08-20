@@ -1,7 +1,6 @@
 use std::io::{self, Write};
 use std::path::Path;
-use std::process::Output;
-use std::{fs, process::Command};
+use std::process::{Output, Command};
 
 fn write_out(output: &Output) -> Result<(), String> {
     match io::stdout().write_all(&output.stdout) {
@@ -33,21 +32,16 @@ pub fn can_access_remote(repo_str: &str) -> Result<bool, String> {
 }
 
 pub fn clone(repo_str: &str, target_dir: &Path) -> Result<(), String> {
-    fs::create_dir_all(target_dir).expect("error creating clone directory");
-
-    let command_output = Command::new("git")
+    let clone_output = Command::new("git")
         .arg("clone")
-        .arg("--quiet")
         .arg(repo_str)
         .arg(target_dir)
-        .output()
+        .status()
         .expect("error calling git clone");
 
-    write_out(&command_output)?;
-
-    if command_output.status.success() {
+    if clone_output.success() {
         Ok(())
     } else {
-        Err(String::from("git returned non-zero status code"))
+        Err(String::from("git clone returned non-zero status code"))
     }
 }
