@@ -5,6 +5,7 @@ use std::path::PathBuf;
 
 use crate::configuration::Configuration;
 use crate::repository::Repository;
+use crate::user_configuration::OutputStyle;
 
 mod configuration;
 mod git;
@@ -20,13 +21,27 @@ fn main() {
 fn jclone(repo_str: String) -> Result<(), String> {
     let repository = Repository::try_from(&repo_str)?;
     let config = Configuration::load(&repository.host);
+    let report_git_errors = matches!(
+        config.output_style,
+        OutputStyle::Default | OutputStyle::NoGit
+    );
+    let print_progress = matches!(
+        config.output_style,
+        OutputStyle::Default | OutputStyle::GitOnly
+    );
     let target_dir = target_dir(&repository, &config);
 
-    git::can_access_remote(&repo_str)?;
-    create_target_dir(&target_dir)?;
-    git::clone(&repo_str, &target_dir)?;
+    if !git::can_access_remote(&repo_str, print_progress, report_git_errors)? {
+        return Ok(());
+    }
 
-    println!("🎉 Done!");
+    create_target_dir(&target_dir)?;
+    git::clone(&repo_str, &target_dir, print_progress, report_git_errors)?;
+
+    match config.output_style {
+        OutputStyle::Default | OutputStyle::NoGit => println!("🎉 Done!"),
+        _ => (),
+    };
 
     Ok(())
 }

@@ -44,7 +44,7 @@ output = "git-only" # options: "git-only", "no-git", "quiet", "default"
 host = "git.example.com"
 base_dir = "/home/ferris/work"
 use_full_path = true
-output = "default"
+output = "quiet"
 ```
 
 Yields something like:
@@ -55,23 +55,31 @@ Cloning into '/home/ferris/code/rustlings'...
 remote: Enumerating objects: 14038, done.
 ... more git output
 Resolving deltas: 100% (8076/8076), done
-🎉 Done!
 ```
 
 or:
 
 ```
 $ jclone git@git.example.com:my-department/backend/big-project.git
-Cloning into '/home/ferris/work/my-department/backend/big-project.git'...
-...
-... more git output
-...
-🎉 Done!
+
 ```
 
 ## Configuration precedence
 
 Config values from the first matching variant for a given host, if any, come first. Any missing values are filled in from your base user config (the settings not in any variant) and then from jclone defaults.
+
+## Choosing what jclone prints out
+
+As noted above, you can choose what jclone prints to your terminal with the `output` option in your configuration file. Below are the possible values.
+
+| Value                  | Clone progress | Git errors | Flavour text on errors | "🎉 Done!" |
+|------------------------|----------------|------------|------------------------|------------|
+| `"default"` or missing |       ✅       |     ✅     |           ✅           |     ✅     |
+| `"git-only"`           |       ✅       |     ✅     |                        |            |
+| `"no-git"`             |                |            |           ✅           |     ✅     |
+| `"quiet"`              |                |            |                        |            |
+
+Errors in jclone like config parsing issues and IO errors will always be printed.
 
 # Planned features
 
@@ -83,15 +91,15 @@ Config values from the first matching variant for a given host, if any, come fir
 - [x] Per-host configuration by exact match on host
 - [ ] Per-host configuration by pattern matching host
 - [x] Stream git output so user can see clone progress
-- [ ] Quiet option to suppress all output
-- [ ] Git-only output option so only git output is printed
+- [x] Quiet option to suppress all output
+- [x] Git-only output option so only git output is printed
 - [x] Check repo exists before creating any directories
 - [ ] Tidy up any created directories on error
 - [ ] Pass git args to command
 - [ ] Configure default git args
 - [ ] Check several locations for config file
-- [ ] deb/rpm packages
-- [ ] Automated releases
+- [x] deb/rpm packages
+- [x] Automated releases
 - [ ] Windows support lol
 
 ## Changes needed to support Windows

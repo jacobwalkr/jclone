@@ -9,11 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `output` config field
+- `output` config field with options `default`, `git-only`, `no-git` and `quiet`
 
 ### Changed
 
-- Send `git clone` progress output to stdout instead of "Cloning into..." message
+- Send `git clone` progress output to stdout by default instead of "Cloning into..." message
 
 ## [0.5.0] - 2025-08-19
 
