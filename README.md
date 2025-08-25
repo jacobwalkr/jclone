@@ -39,6 +39,7 @@ base_dir = "/home/ferris/code" # defaults to "$HOME/src"
 use_host_dir = false # default: true
 use_full_path = false # default: true
 output = "git-only" # options: "git-only", "no-git", "quiet", "default"
+git_executable = "/usr/local/bin/git" # default: "git"
 
 [[variant]]
 host = "git.example.com"

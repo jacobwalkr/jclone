@@ -30,11 +30,11 @@ fn jclone(repo_str: String) -> Result<(), String> {
     );
     let target_dir = target_dir(&repository, &config);
 
-    if !git::can_access_remote(&repo_str, print_progress, report_git_errors)? {
+    if !git::can_access_remote(&repo_str, print_progress, report_git_errors, &config.git_executable)? {
         return Ok(());
     }
 
-    git::clone(&repo_str, &target_dir, print_progress, report_git_errors)?;
+    git::clone(&repo_str, &target_dir, print_progress, report_git_errors, &config.git_executable)?;
 
     match config.output_style {
         OutputStyle::Default | OutputStyle::NoGit => println!("🎉 Done!"),
