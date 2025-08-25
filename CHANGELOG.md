@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Send `git clone` progress output to stdout by default instead of "Cloning into..." message
+- Leave directory creation to `git clone`
 
 ## [0.5.0] - 2025-08-19
 

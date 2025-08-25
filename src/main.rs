@@ -1,5 +1,4 @@
 use std::env;
-use std::fs;
 use std::path::Component;
 use std::path::PathBuf;
 
@@ -35,7 +34,6 @@ fn jclone(repo_str: String) -> Result<(), String> {
         return Ok(());
     }
 
-    create_target_dir(&target_dir)?;
     git::clone(&repo_str, &target_dir, print_progress, report_git_errors)?;
 
     match config.output_style {
@@ -44,13 +42,6 @@ fn jclone(repo_str: String) -> Result<(), String> {
     };
 
     Ok(())
-}
-
-fn create_target_dir(target_dir: &PathBuf) -> Result<(), String> {
-    match fs::create_dir_all(target_dir) {
-        Ok(_) => Ok(()),
-        Err(err) => Err(format!("error creating directory: {err}")),
-    }
 }
 
 fn target_dir(repo: &Repository, config: &Configuration) -> PathBuf {

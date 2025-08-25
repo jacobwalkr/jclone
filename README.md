@@ -94,7 +94,7 @@ Errors in jclone like config parsing issues and IO errors will always be printed
 - [x] Quiet option to suppress all output
 - [x] Git-only output option so only git output is printed
 - [x] Check repo exists before creating any directories
-- [ ] Tidy up any created directories on error
+- [ ] ~~Tidy up any created directories on error~~
 - [ ] Pass git args to command
 - [ ] Configure default git args
 - [ ] Check several locations for config file
