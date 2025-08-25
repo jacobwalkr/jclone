@@ -20,6 +20,7 @@ pub struct UserConfiguration {
     pub use_full_path: Option<bool>,
     #[serde(rename = "output")]
     pub output_style: Option<OutputStyle>,
+    pub git_executable: Option<String>,
     #[serde(default)]
     #[serde(rename = "variant")]
     pub variants: Vec<UserHostConfiguration>,
@@ -34,6 +35,7 @@ pub struct UserHostConfiguration {
     pub use_full_path: Option<bool>,
     #[serde(rename = "output")]
     pub output_style: Option<OutputStyle>,
+    pub git_executable: Option<String>,
 }
 
 impl From<String> for UserConfiguration {
@@ -78,6 +80,7 @@ mod tests {
             use_host_dir: None,
             use_full_path: None,
             output_style: None,
+            git_executable: None,
             variants: vec![],
         };
 
@@ -92,6 +95,7 @@ mod tests {
             use_host_dir = false
             use_full_path = true
             output = "no-git"
+            git_executable = "/home/ferris/bin/git"
             "#,
         );
 
@@ -100,6 +104,7 @@ mod tests {
             use_host_dir: Some(false),
             use_full_path: Some(true),
             output_style: Some(OutputStyle::NoGit),
+            git_executable: Some(String::from("/home/ferris/bin/git")),
             variants: vec![],
         };
 
@@ -116,6 +121,7 @@ mod tests {
             use_host_dir = false
             use_full_path = true
             output = "git-only"
+            git_executable = "/home/ferris/bin/git"
 
             [[variant]]
             host = "example.com"
@@ -123,6 +129,7 @@ mod tests {
             use_host_dir = true
             use_full_path = true
             output = "default"
+            git_executable = "bin/git-example-com"
 
             [[variant]]
             host = "example.net"
@@ -130,6 +137,7 @@ mod tests {
             use_host_dir = false
             use_full_path = false
             output = "quiet"
+            git_executable = "bin/git-example-net"
             "#,
         );
 
@@ -138,6 +146,7 @@ mod tests {
             use_host_dir: Some(false),
             use_full_path: Some(true),
             output_style: Some(OutputStyle::GitOnly),
+            git_executable: Some(String::from("/home/ferris/bin/git")),
             variants: vec![
                 UserHostConfiguration {
                     host: String::from("example.com"),
@@ -145,6 +154,7 @@ mod tests {
                     use_host_dir: Some(true),
                     use_full_path: Some(true),
                     output_style: Some(OutputStyle::Default),
+                    git_executable: Some(String::from("bin/git-example-com")),
                 },
                 UserHostConfiguration {
                     host: String::from("example.net"),
@@ -152,6 +162,7 @@ mod tests {
                     use_host_dir: Some(false),
                     use_full_path: Some(false),
                     output_style: Some(OutputStyle::Quiet),
+                    git_executable: Some(String::from("bin/git-example-net")),
                 },
             ],
         };

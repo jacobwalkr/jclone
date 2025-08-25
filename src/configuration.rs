@@ -11,6 +11,7 @@ pub struct Configuration {
     pub use_host_dir: bool,
     pub use_full_path: bool,
     pub output_style: OutputStyle,
+    pub git_executable: String,
 }
 
 impl Configuration {
@@ -34,6 +35,10 @@ impl Configuration {
                 .output_style
                 .or(user_config.output_style)
                 .unwrap_or_default(),
+            git_executable: host_variant
+                .git_executable
+                .or(user_config.git_executable)
+                .unwrap_or(String::from("git")),
         }
     }
 
@@ -62,6 +67,7 @@ mod tests {
             use_host_dir: Some(false),
             use_full_path: Some(false),
             output_style: Some(OutputStyle::Quiet),
+            git_executable: Some(String::from("/home/ferris/bin/git")),
             variants: Default::default(),
         }
     }
@@ -81,6 +87,7 @@ mod tests {
                     use_host_dir: Some(true),
                     use_full_path: Some(true),
                     output_style: Some(OutputStyle::GitOnly),
+                    git_executable: Some(String::from("bin/git-example-com")),
                 },
             ],
             ..base_user_config()
@@ -99,6 +106,7 @@ mod tests {
             use_host_dir: true,
             use_full_path: true,
             output_style: OutputStyle::Default,
+            git_executable: String::from("git"),
         };
 
         assert_eq!(actual, expected);
@@ -115,6 +123,7 @@ mod tests {
             use_host_dir: false,
             use_full_path: false,
             output_style: OutputStyle::Quiet,
+            git_executable: String::from("/home/ferris/bin/git"),
         };
 
         assert_eq!(actual, expected);
@@ -131,6 +140,7 @@ mod tests {
             use_host_dir: false,
             use_full_path: false,
             output_style: OutputStyle::Quiet,
+            git_executable: String::from("/home/ferris/bin/git"),
         };
 
         assert_eq!(actual, expected);
@@ -147,6 +157,7 @@ mod tests {
             use_host_dir: true,
             use_full_path: true,
             output_style: OutputStyle::GitOnly,
+            git_executable: String::from("bin/git-example-com"),
         };
 
         assert_eq!(actual, expected);
@@ -170,6 +181,7 @@ mod tests {
             use_host_dir: false,
             use_full_path: true,
             output_style: OutputStyle::Quiet,
+            git_executable: String::from("/home/ferris/bin/git"),
         };
 
         assert_eq!(actual, expected);

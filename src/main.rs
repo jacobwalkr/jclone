@@ -88,6 +88,7 @@ mod tests {
             use_host_dir: true,
             use_full_path: true,
             output_style: OutputStyle::default(),
+            git_executable: String::from("git"),
         }
     }
 
