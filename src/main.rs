@@ -3,11 +3,13 @@ use std::path::Component;
 use std::path::PathBuf;
 
 use crate::configuration::Configuration;
+use crate::errors::JCloneError;
 use crate::git::Git;
 use crate::repository::Repository;
 use crate::user_configuration::OutputStyle;
 
 mod configuration;
+mod errors;
 mod git;
 mod repository;
 mod user_configuration;
@@ -15,10 +17,10 @@ mod user_configuration;
 fn main() {
     let arg_repo = env::args().nth(1).expect("expecting argument: repository");
 
-    jclone(arg_repo).unwrap_or_else(|err| println!("❌ Error: {err}"));
+    jclone(arg_repo).unwrap_or_else(|err| println!("❌ {err}"));
 }
 
-fn jclone(repo_str: String) -> Result<(), String> {
+fn jclone(repo_str: String) -> Result<(), JCloneError> {
     let repository = Repository::try_from(&repo_str)?;
     let config = Configuration::load(&repository.host);
     let git = Git::new(&repo_str, &config);

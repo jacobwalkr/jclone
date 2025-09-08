@@ -1,3 +1,5 @@
+use crate::errors::{JCloneError, JCloneResult};
+
 #[derive(Debug, PartialEq)]
 pub struct Repository {
     pub host: String,
@@ -5,18 +7,22 @@ pub struct Repository {
 }
 
 impl TryFrom<&String> for Repository {
-    type Error = String;
+    type Error = JCloneError;
 
-    fn try_from(repo_str: &String) -> Result<Self, Self::Error> {
+    fn try_from(repo_str: &String) -> JCloneResult<Self> {
         let part_after_proto = match repo_str.split_once("://") {
             None => repo_str,
             Some((_, p)) => p,
         };
 
         let (prefix, suffix) = match part_after_proto.split_once(':') {
-            Some(("", _)) | Some((_, "")) | None => return Err(String::from("unexpected format")),
+            Some(("", _)) | Some((_, "")) | None => {
+                return Err(JCloneError::RepositoryParse("unexpected format"));
+            }
             Some((prefix, _)) if prefix.contains('/') => {
-                return Err(String::from("looks like local path"));
+                return Err(JCloneError::RepositoryParse(
+                    "local paths are not supported",
+                ));
             }
             Some(parts) => parts,
         };
@@ -73,7 +79,7 @@ mod tests {
         #[case] input: String,
         #[case] host: String,
         #[case] path: String,
-    ) -> Result<(), String> {
+    ) -> Result<(), JCloneError> {
         let expected = Repository { host, path };
 
         assert_eq!(Repository::try_from(&input)?, expected);
