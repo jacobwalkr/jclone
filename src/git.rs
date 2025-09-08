@@ -31,7 +31,7 @@ impl Git {
         }
     }
 
-    pub fn can_access_remote(&self) -> Result<bool, String> {
+    fn can_access_remote(&self) -> Result<bool, String> {
         let stderr = match self.print_progress {
             true => Stdio::inherit(),
             false => Stdio::null(),
@@ -56,6 +56,12 @@ impl Git {
     }
 
     pub fn clone(&self, target_dir: &Path) -> Result<(), String> {
+        match self.can_access_remote() {
+            Ok(true) => (),
+            Ok(false) => return Ok(()),
+            Err(err) => return Err(err),
+        }
+
         let stdio = match self.print_progress {
             true => || Stdio::inherit(),
             false => || Stdio::null(),

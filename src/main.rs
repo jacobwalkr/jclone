@@ -24,10 +24,6 @@ fn jclone(repo_str: String) -> Result<(), String> {
     let git = Git::new(&repo_str, &config);
     let target_dir = target_dir(&repository, &config);
 
-    if !git.can_access_remote()? {
-        return Ok(());
-    }
-
     git.clone(&target_dir)?;
 
     match config.output_style {
