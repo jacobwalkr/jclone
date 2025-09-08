@@ -38,7 +38,7 @@ impl Git {
         };
 
         let ls_remote_output = Command::new(&self.git_executable)
-            .args(["ls-remote", "--branches"])
+            .args(["ls-remote", "--heads"])
             .arg(&self.repo_str)
             .stdout(Stdio::null())
             .stderr(stderr)
