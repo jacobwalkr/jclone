@@ -1,58 +1,84 @@
 use std::path::Path;
 use std::process::{Command, Stdio};
 
-pub fn can_access_remote(
-    repo_str: &str,
-    inherit_stderr: bool,
-    report_git_errors: bool,
-    git_executable: &String,
-) -> Result<bool, String> {
-    let stderr = match inherit_stderr {
-        true => Stdio::inherit(),
-        false => Stdio::null(),
-    };
+use crate::configuration::Configuration;
+use crate::user_configuration::OutputStyle;
 
-    let ls_remote_output = Command::new(git_executable)
-        .args(["ls-remote", "--branches"])
-        .arg(repo_str)
-        .stdout(Stdio::null())
-        .stderr(stderr)
-        .status();
-
-    match ls_remote_output {
-        Ok(output) if output.success() => Ok(true),
-        Ok(_) if report_git_errors => Err(String::from("couldn't access repository")),
-        Ok(_) => Ok(false),
-        Err(err) => Err(format!("error calling `{git_executable} ls-remote`: {err}")),
-    }
+pub struct Git {
+    git_executable: String,
+    repo_str: String,
+    print_progress: bool,
+    report_errors: bool,
 }
 
-pub fn clone(
-    repo_str: &str,
-    target_dir: &Path,
-    print_progress: bool,
-    report_git_errors: bool,
-    git_executable: &String,
-) -> Result<(), String> {
-    let stdio = match print_progress {
-        true => || Stdio::inherit(),
-        false => || Stdio::null(),
-    };
+impl Git {
+    pub fn new(repo_str: &str, config: &Configuration) -> Self {
+        let report_errors = matches!(
+            config.output_style,
+            OutputStyle::Default | OutputStyle::NoGit
+        );
 
-    let clone_status = Command::new(git_executable)
-        .arg("clone")
-        .arg(repo_str)
-        .arg(target_dir)
-        .stdout(stdio())
-        .stderr(stdio())
-        .status();
+        let print_progress = matches!(
+            config.output_style,
+            OutputStyle::Default | OutputStyle::GitOnly
+        );
 
-    match clone_status {
-        Ok(status) if status.success() => Ok(()),
-        Ok(_) => match report_git_errors {
-            true => Err(String::from("git clone returned non-zero status code")),
-            false => Ok(()),
-        },
-        Err(err) => Err(format!("error calling `{git_executable} clone`: {err}")),
+        Self {
+            git_executable: config.git_executable.to_owned(),
+            repo_str: repo_str.to_owned(),
+            print_progress,
+            report_errors,
+        }
+    }
+
+    pub fn can_access_remote(&self) -> Result<bool, String> {
+        let stderr = match self.print_progress {
+            true => Stdio::inherit(),
+            false => Stdio::null(),
+        };
+
+        let ls_remote_output = Command::new(&self.git_executable)
+            .args(["ls-remote", "--branches"])
+            .arg(&self.repo_str)
+            .stdout(Stdio::null())
+            .stderr(stderr)
+            .status();
+
+        match ls_remote_output {
+            Ok(output) if output.success() => Ok(true),
+            Ok(_) if self.report_errors => Err(String::from("couldn't access repository")),
+            Ok(_) => Ok(false),
+            Err(err) => Err(format!(
+                "error calling `{0} ls-remote`: {err}",
+                &self.git_executable
+            )),
+        }
+    }
+
+    pub fn clone(&self, target_dir: &Path) -> Result<(), String> {
+        let stdio = match self.print_progress {
+            true => || Stdio::inherit(),
+            false => || Stdio::null(),
+        };
+
+        let clone_status = Command::new(&self.git_executable)
+            .arg("clone")
+            .arg(&self.repo_str)
+            .arg(target_dir)
+            .stdout(stdio())
+            .stderr(stdio())
+            .status();
+
+        match clone_status {
+            Ok(status) if status.success() => Ok(()),
+            Ok(_) => match self.report_errors {
+                true => Err(String::from("git clone returned non-zero status code")),
+                false => Ok(()),
+            },
+            Err(err) => Err(format!(
+                "error calling `{0} clone`: {err}",
+                &self.git_executable
+            )),
+        }
     }
 }
