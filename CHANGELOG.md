@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+_nothing yet_
+
+## [0.6.0] - 2025-09-16
+
 ### Added
 
 - `output` config field with options `default`, `git-only`, `no-git` and `quiet`
@@ -42,7 +46,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * [0.2.0] *2025-05-20* - Now accepts single argument (repo URL) and clones to folder under `~/src` based on host and path
 * [0.1.0] *2025-05-20* - New project, forwards all arguments to `git clone` (licence BSD-3-Clause-No-Military)
 
-[Unreleased]: https://github.com/jacobwalkr/jclone/compare/v0.5.0..main
+[Unreleased]: https://github.com/jacobwalkr/jclone/compare/v0.6.0..main
+[0.6.0]: https://github.com/jacobwalkr/jclone/compare/v0.5.0..v0.6.0
 [0.5.0]: https://github.com/jacobwalkr/jclone/compare/v0.4.1..v0.5.0
 [0.4.1]: https://github.com/jacobwalkr/jclone/compare/v0.4.0..v0.4.1
 [0.4.0]: https://github.com/jacobwalkr/jclone/compare/v0.3.2..v0.4.0

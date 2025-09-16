@@ -9,7 +9,7 @@ What can I say? I like to keep my repos organised.
 
 # Download
 
-[Head to the releases](https://github.com/jacobwalkr/jclone/releases) and download latest version as a compiled binary or a package for your preferred flavour of Linux. If you use the binary, don't forget to make sure it's placed somewhere in your `$PATH`!
+[Head to the releases](https://github.com/jacobwalkr/jclone/releases) and download the latest version as a compiled binary or a package for your preferred flavour of Linux. If you use the binary, don't forget to place it somewhere in your `$PATH`!
 
 # Usage
 
@@ -62,7 +62,6 @@ or:
 
 ```
 $ jclone git@git.example.com:my-department/backend/big-project.git
-
 ```
 
 ## Configuration precedence
