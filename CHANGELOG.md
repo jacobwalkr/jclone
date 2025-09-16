@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Leave directory creation to `git clone`
 - Use `ls-remote --heads` instead of `--branches` to fix error on older git versions that don't have the newer option
 - Internally reworked error handling
+- Nicer error message when you forget the repository argument
 
 ## [0.5.0] - 2025-08-19
 

@@ -24,9 +24,7 @@ enum HandledError {
 }
 
 fn main() -> ExitCode {
-    let arg_repo = env::args().nth(1).expect("expecting argument: repository");
-
-    match jclone(arg_repo) {
+    match jclone() {
         Err(HandledError::Unreported(err)) => {
             eprintln!("❌ {err}");
             ExitCode::FAILURE
@@ -36,7 +34,11 @@ fn main() -> ExitCode {
     }
 }
 
-fn jclone(repo_str: String) -> Result<(), HandledError> {
+fn jclone() -> Result<(), HandledError> {
+    let repo_str = env::args().nth(1).ok_or_else(|| {
+        HandledError::Unreported(JCloneError::Generic("missing argument: repository"))
+    })?;
+
     let repository = Repository::try_from(&repo_str).map_err(HandledError::Unreported)?;
     let config = Configuration::try_load(&repository.host).map_err(HandledError::Unreported)?;
     let git = Git::new(&repo_str, &config);

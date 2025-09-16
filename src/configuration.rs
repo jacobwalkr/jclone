@@ -18,9 +18,7 @@ fn default_base_dir(home: String) -> JCloneResult<String> {
     Ok(PathBuf::from(home)
         .join("src")
         .to_str()
-        .ok_or(JCloneError::Generic(String::from(
-            "UTF-8 error parsing HOME directory",
-        )))?
+        .ok_or(JCloneError::Generic("UTF-8 error parsing HOME directory"))?
         .to_owned())
 }
 

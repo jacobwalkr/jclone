@@ -4,7 +4,7 @@ use thiserror::Error;
 #[derive(Error, Debug)]
 pub enum JCloneError {
     #[error("Error: {0}")]
-    Generic(String),
+    Generic(&'static str),
 
     #[error("Error: {0}")]
     Environment(#[from] VarError),
