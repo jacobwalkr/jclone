@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Send `git clone` progress output to stdout by default instead of "Cloning into..." message
 - Leave directory creation to `git clone`
 - Use `ls-remote --heads` instead of `--branches` to fix error on older git versions that don't have the newer option
+- Internally reworked error handling
 
 ## [0.5.0] - 2025-08-19
 

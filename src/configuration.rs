@@ -1,9 +1,9 @@
-use std::{
-    env,
-    path::{Path, PathBuf},
-};
+use std::{env, path::PathBuf};
 
-use crate::user_configuration::{OutputStyle, UserConfiguration};
+use crate::{
+    errors::{JCloneError, JCloneResult},
+    user_configuration::{OutputStyle, UserConfiguration},
+};
 
 #[derive(Debug, PartialEq)]
 pub struct Configuration {
@@ -14,15 +14,31 @@ pub struct Configuration {
     pub git_executable: String,
 }
 
+fn default_base_dir(home: String) -> JCloneResult<String> {
+    Ok(PathBuf::from(home)
+        .join("src")
+        .to_str()
+        .ok_or(JCloneError::Generic(String::from(
+            "UTF-8 error parsing HOME directory",
+        )))?
+        .to_owned())
+}
+
 impl Configuration {
-    fn from_user_configuration(user_config: UserConfiguration, host: &String, home: &Path) -> Self {
+    fn from_user_configuration(
+        user_config: UserConfiguration,
+        host: &String,
+        home: String,
+    ) -> JCloneResult<Self> {
         let host_variant = user_config.variant_matching_host(host);
 
-        Self {
-            base_dir: host_variant
-                .base_dir
-                .or(user_config.base_dir)
-                .unwrap_or_else(|| home.join("src").to_str().unwrap().to_owned()),
+        let base_dir = match host_variant.base_dir.or(user_config.base_dir) {
+            Some(dir) => dir,
+            None => default_base_dir(home)?,
+        };
+
+        Ok(Self {
+            base_dir,
             use_host_dir: host_variant
                 .use_host_dir
                 .or(user_config.use_host_dir)
@@ -39,14 +55,14 @@ impl Configuration {
                 .git_executable
                 .or(user_config.git_executable)
                 .unwrap_or(String::from("git")),
-        }
+        })
     }
 
-    pub fn load(host: &String) -> Self {
-        let user_config = UserConfiguration::load().unwrap_or_default();
-        let home = PathBuf::from(env::var("HOME").expect("$HOME environment variable isn't set"));
+    pub fn try_load(host: &String) -> JCloneResult<Self> {
+        let user_config = UserConfiguration::try_load()?;
+        let home_str = env::var("HOME").map_err(JCloneError::Environment)?;
 
-        Self::from_user_configuration(user_config, host, &home)
+        Self::from_user_configuration(user_config, host, home_str)
     }
 }
 
@@ -98,9 +114,10 @@ mod tests {
     fn test_from_user_configuration_empty_user_config() {
         let default_user_config = UserConfiguration::default();
         let host = String::from("no-match.example.com");
-        let home = PathBuf::from("/some/directory");
+        let home = String::from("/some/directory");
 
-        let actual = Configuration::from_user_configuration(default_user_config, &host, &home);
+        let actual =
+            Configuration::from_user_configuration(default_user_config, &host, home).unwrap();
         let expected = Configuration {
             base_dir: String::from("/some/directory/src"),
             use_host_dir: true,
@@ -115,8 +132,8 @@ mod tests {
     #[rstest]
     fn test_from_user_configuration_base_user_config(base_user_config: UserConfiguration) {
         let host = String::from("no-match.example.net");
-        let home = PathBuf::from("/some/directory");
-        let actual = Configuration::from_user_configuration(base_user_config, &host, &home);
+        let home = String::from("/some/directory");
+        let actual = Configuration::from_user_configuration(base_user_config, &host, home).unwrap();
 
         let expected = Configuration {
             base_dir: String::from("/some/other/directory"),
@@ -132,8 +149,9 @@ mod tests {
     #[rstest]
     fn test_from_user_configuration_non_matching_host(complete_user_config: UserConfiguration) {
         let host = String::from("no-match.example.net");
-        let home = PathBuf::from("/some/directory");
-        let actual = Configuration::from_user_configuration(complete_user_config, &host, &home);
+        let home = String::from("/some/directory");
+        let actual =
+            Configuration::from_user_configuration(complete_user_config, &host, home).unwrap();
 
         let expected = Configuration {
             base_dir: String::from("/some/other/directory"),
@@ -149,8 +167,9 @@ mod tests {
     #[rstest]
     fn test_from_user_configuration_matching_host(complete_user_config: UserConfiguration) {
         let host = String::from("example.com");
-        let home = PathBuf::from("/some/directory");
-        let actual = Configuration::from_user_configuration(complete_user_config, &host, &home);
+        let home = String::from("/some/directory");
+        let actual =
+            Configuration::from_user_configuration(complete_user_config, &host, home).unwrap();
 
         let expected = Configuration {
             base_dir: String::from("/dir/example-com"),
@@ -173,8 +192,9 @@ mod tests {
         };
 
         let host = String::from("example.org");
-        let home_dir = PathBuf::from("/some/directory");
-        let actual = Configuration::from_user_configuration(partial_user_config, &host, &home_dir);
+        let home = String::from("/some/directory");
+        let actual =
+            Configuration::from_user_configuration(partial_user_config, &host, home).unwrap();
 
         let expected = Configuration {
             base_dir: String::from("/dir/example-org"),

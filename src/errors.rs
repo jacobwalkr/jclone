@@ -1,8 +1,20 @@
-use std::io;
+use std::{env::VarError, io, path::PathBuf};
 use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum JCloneError {
+    #[error("Error: {0}")]
+    Generic(String),
+
+    #[error("Error: {0}")]
+    Environment(#[from] VarError),
+
+    #[error("Couldn't load configuration from {0}: {1}")]
+    ConfigurationFileLoad(PathBuf, #[source] io::Error),
+
+    #[error("Couldn't parse configuration from: {0}:\n{1}")]
+    ConfigurationParse(PathBuf, toml::de::Error),
+
     #[error("{executable} {command}: {source}")]
     GitSystem {
         executable: String,

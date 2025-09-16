@@ -1,6 +1,7 @@
+use serde::Deserialize;
 use std::{env, fs, path::PathBuf};
 
-use serde::Deserialize;
+use crate::errors::{JCloneError, JCloneResult};
 
 #[derive(Deserialize, Debug, PartialEq, Default, Clone)]
 #[serde(rename_all = "kebab-case")]
@@ -38,9 +39,11 @@ pub struct UserHostConfiguration {
     pub git_executable: Option<String>,
 }
 
-impl From<String> for UserConfiguration {
-    fn from(value: String) -> Self {
-        toml::from_str(&value).unwrap_or_else(|err| panic!("Failed to parse configuration: {err}"))
+impl TryFrom<String> for UserConfiguration {
+    type Error = toml::de::Error;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        toml::from_str(&value)
     }
 }
 
@@ -52,17 +55,19 @@ impl UserConfiguration {
             .map_or_else(UserHostConfiguration::default, |v| v.to_owned())
     }
 
-    pub fn load() -> Option<Self> {
-        let home = PathBuf::from(env::var("HOME").expect("$HOME environment variable isn't set"));
+    pub fn try_load() -> JCloneResult<Self> {
+        let home = PathBuf::from(env::var("HOME").map_err(JCloneError::Environment)?);
         let config_path = PathBuf::from(&home).join(".jclone.toml");
 
-        config_path
-            .exists()
-            .then(|| {
-                fs::read_to_string(&config_path)
-                    .unwrap_or_else(|err| panic!("Error reading config file: {err}"))
-            })
-            .map(Self::from)
+        if !config_path.exists() {
+            return Ok(Self::default());
+        }
+
+        match fs::read_to_string(&config_path) {
+            Ok(config_str) => Ok(toml::from_str(&config_str)
+                .map_err(|err| JCloneError::ConfigurationParse(config_path, err))?),
+            Err(err) => Err(JCloneError::ConfigurationFileLoad(config_path, err)),
+        }
     }
 }
 
@@ -73,7 +78,7 @@ mod tests {
     #[test]
     fn test_user_configuration_load_can_deserialize_empty_file() {
         let user_config_str = String::from("");
-        let actual = UserConfiguration::from(user_config_str);
+        let actual = UserConfiguration::try_from(user_config_str).unwrap();
 
         let default_config = UserConfiguration {
             base_dir: None,
@@ -108,7 +113,7 @@ mod tests {
             variants: vec![],
         };
 
-        let actual = UserConfiguration::from(user_config_str);
+        let actual = UserConfiguration::try_from(user_config_str).unwrap();
 
         assert_eq!(actual, expected);
     }
@@ -167,7 +172,7 @@ mod tests {
             ],
         };
 
-        let actual = UserConfiguration::from(user_config_str);
+        let actual = UserConfiguration::try_from(user_config_str).unwrap();
 
         assert_eq!(actual, expected);
     }
@@ -181,7 +186,7 @@ mod tests {
             "#,
         );
 
-        let _ = UserConfiguration::from(user_config_str);
+        let _ = UserConfiguration::try_from(user_config_str).unwrap();
     }
 
     #[test]
@@ -194,7 +199,7 @@ mod tests {
             "#,
         );
 
-        let _ = UserConfiguration::from(user_config_str);
+        let _ = UserConfiguration::try_from(user_config_str).unwrap();
     }
 
     #[test]

@@ -1,6 +1,7 @@
 use std::env;
 use std::path::Component;
 use std::path::PathBuf;
+use thiserror::Error;
 
 use crate::configuration::Configuration;
 use crate::errors::JCloneError;
@@ -14,19 +15,34 @@ mod git;
 mod repository;
 mod user_configuration;
 
+#[derive(Error, Debug)]
+#[error(transparent)]
+enum HandledError {
+    Unreported(#[from] JCloneError),
+    Reported(JCloneError),
+}
+
 fn main() {
     let arg_repo = env::args().nth(1).expect("expecting argument: repository");
 
-    jclone(arg_repo).unwrap_or_else(|err| println!("❌ {err}"));
+    match jclone(arg_repo) {
+        Err(HandledError::Unreported(err)) => println!("❌ {err}"),
+        Err(HandledError::Reported(_)) => (),
+        Ok(_) => (),
+    }
 }
 
-fn jclone(repo_str: String) -> Result<(), JCloneError> {
-    let repository = Repository::try_from(&repo_str)?;
-    let config = Configuration::load(&repository.host);
+fn jclone(repo_str: String) -> Result<(), HandledError> {
+    let repository = Repository::try_from(&repo_str).map_err(HandledError::Unreported)?;
+    let config = Configuration::try_load(&repository.host).map_err(HandledError::Unreported)?;
     let git = Git::new(&repo_str, &config);
     let target_dir = target_dir(&repository, &config);
 
-    git.clone(&target_dir)?;
+    git.clone(&target_dir)
+        .map_err(|err| match config.output_style {
+            OutputStyle::GitOnly | OutputStyle::Quiet => HandledError::Reported(err),
+            _ => HandledError::Unreported(err),
+        })?;
 
     match config.output_style {
         OutputStyle::Default | OutputStyle::NoGit => println!("🎉 Done!"),
