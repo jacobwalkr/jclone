@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `output` config field with options `default`, `git-only`, `no-git` and `quiet`
 - `git_executable` config field, defaulting to `git`
+- Returns exit code 0 on success and 1 on failure
 
 ### Changed
 

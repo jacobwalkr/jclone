@@ -102,7 +102,7 @@ Errors in jclone like config parsing issues and IO errors will always be printed
 - [x] deb/rpm packages
 - [x] Automated releases
 - [ ] Windows support lol
-- [ ] Exit status codes
+- [x] Exit status codes
 - [ ] Tidier CLI (e.g. missing argument shouldn't panic)
 
 ## Changes needed to support Windows

@@ -1,6 +1,7 @@
 use std::env;
 use std::path::Component;
 use std::path::PathBuf;
+use std::process::ExitCode;
 use thiserror::Error;
 
 use crate::configuration::Configuration;
@@ -22,13 +23,16 @@ enum HandledError {
     Reported(JCloneError),
 }
 
-fn main() {
+fn main() -> ExitCode {
     let arg_repo = env::args().nth(1).expect("expecting argument: repository");
 
     match jclone(arg_repo) {
-        Err(HandledError::Unreported(err)) => println!("❌ {err}"),
-        Err(HandledError::Reported(_)) => (),
-        Ok(_) => (),
+        Err(HandledError::Unreported(err)) => {
+            eprintln!("❌ {err}");
+            ExitCode::FAILURE
+        }
+        Err(HandledError::Reported(_)) => ExitCode::FAILURE,
+        Ok(_) => ExitCode::SUCCESS,
     }
 }
 
