@@ -9,9 +9,11 @@ What can I say? I like to keep my repos organised.
 
 # Download
 
-[Head to the releases](https://github.com/jacobwalkr/jclone/releases) and download the latest version as a compiled binary or a package for your preferred flavour of Linux. If you use the binary, don't forget to place it somewhere in your `$PATH`!
+[Head to the releases](https://github.com/jacobwalkr/jclone/releases) and download the latest version as a compiled binary for Linux or MacOS, or a package for your preferred flavour of Linux. If you use the binary, don't forget to place it somewhere in your `$PATH`!
 
 # Usage
+
+Requires [git](https://git-scm.com/).
 
 By default, clones the given repository into `$HOME/src/<path/to/repo>`. For example:
 
